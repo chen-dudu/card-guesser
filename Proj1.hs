@@ -16,7 +16,7 @@ suitchars = "CDHS"
 initialGuess :: Int -> ([Card], GameState)
 initialGuess n
     | n < 1 = error("invalid input!")
-    | otherwise = (map stringToCard (zipWith formCard ranks suits), [[]])
+    | otherwise = (map stringToCard (zipWith formCardString ranks suits), [[]])
         where ranks = initialChooseRank separation rankchars
               suits = [suitchars !! i | i <- [0..n]]
               separation = (length rankchars) `div` (n + 1)
@@ -49,9 +49,10 @@ initialChooseRank n lst
                                          (i*(n + 1) - 1) < length lst]
 
 -- this function takes two characters indicating 
--- the rank and suit of a card, and produces a Card
-formCard :: Char -> Char -> String
-formCard rank suie = rank:suie:[]
+-- the rank and suit of a card, and produces a String 
+-- representation of the Card
+formCardString :: Char -> Char -> String
+formCardString rank suie = rank:suie:[]
 
 -- convert the string representation of a card to the actual Card type
 stringToCard :: String -> Card
