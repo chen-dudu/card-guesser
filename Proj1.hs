@@ -2,7 +2,7 @@
 
 
 -- module Proj1 (feedback, initialGuess, nextGuess, GameState) where
-module Proj1 (initialGuess) where
+module Proj1 (initialGuess, feedback) where
 
 import Data.List
 import Data.Ord (comparing)
