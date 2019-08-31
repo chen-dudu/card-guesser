@@ -1,6 +1,3 @@
-
-
-
 module Proj1 (feedback, initialGuess, nextGuess, GameState) where
 
 import Data.List
@@ -92,21 +89,15 @@ countMatchRank (x:xs) ys
 -- only for pattern matching to be exhaustive
 countMatchRank _ _ = 0
 
--- countMatchRank :: [Card] -> [Card] -> Int
--- countMatchRank [] [] = 0
--- countMatchRank (x:xs) (y:ys)
---  | equalRank x y = 1 + countMatchRank xs ys
---  | otherwise = countMatchRank xs ys
--- countMatchRank _ _ = 0
-
 countHigherRank :: [Card] -> [Card] -> Int
 countHigherRank [] [] = 0
+countHigherRank [] _ = 0
+countHigherRank _ [] = 0
 countHigherRank xs ys
     | (compareRank (last xs) (last ys)) > 0 = 1 + countHigherRank (init xs) ys
     | otherwise = 0 
 -- only for pattern matching to be exhaustive
 countHigherRank _ _ = 0
-
 
 countMatchSuit :: [Card] -> [Card] -> Int
 countMatchSuit [] [] = 0
@@ -115,14 +106,6 @@ countMatchSuit (x:xs) ys
     | otherwise = countMatchSuit xs ys
 -- only for pattern matching to be exhaustive
 countMatchSuit _ _ = 0
-
--- countMatchSuit :: [Card] -> [Card] -> Int
--- countMatchSuit [] [] = 0
--- countMatchSuit (x:xs) (y:ys)
---  | equalSuit x y = 1 + countMatchSuit xs ys
---  | otherwise = countMatchSuit xs ys
--- countMatchSuit _ _ = 0
-
 
 getIndex :: Maybe Int -> Int
 getIndex Nothing = -1
@@ -133,30 +116,15 @@ choose2 lst = [[i, j] | i <- lst,
                         j <- (drop (1 + getIndex (elemIndex i lst)) lst)]
 
 choose3 :: [Card] -> [[Card]]
-choose3 lst = [[i, j] | i <- lst, 
+choose3 lst = [[i, j, k] | i <- lst, 
                         j <- (drop (1 + getIndex (elemIndex i lst)) lst), 
                         k <- (drop (1 + getIndex (elemIndex j lst)) lst)]
 
 choose4 :: [Card] -> [[Card]]
-choose4 lst = [[i, j] | i <- lst, 
+choose4 lst = [[i, j, k, m] | i <- lst, 
                         j <- (drop (1 + getIndex (elemIndex i lst)) lst), 
                         k <- (drop (1 + getIndex (elemIndex j lst)) lst), 
                         m <- (drop (1 + getIndex (elemIndex k lst)) lst)]
-
-
-
-equalFeedback :: (Int, Int, Int, Int, Int) -> [Card] -> [Card] -> Bool
-equalFeedback oldFeedback prevGuess newGuess = 
-    (feedback prevGuess newGuess) == oldFeedback
-
-
-
-allpos = initialGameState 2 (stringToCard [i:j:[] | j <- suitchars, i <- rankchars])
-ans = stringToCard ["2C", "3C"]
-guess1 = stringToCard ["6C", "JD"]
-f1 = (0,2,0,0,1)
-guess2 = stringToCard ["QC", "KC"]  
-f2 = (0,2,0,0,2)
 
 ------------------------------------------------------------------------------
 
