@@ -30,16 +30,17 @@ initialGuess n
 nextGuess :: ([Card], GameState) -> (Int, Int, Int, Int, Int) -> ([Card], GameState)
 nextGuess (oldGuess, oldState) oldFeedback = (newGuess, newState)
     where possibleAns = [i | i <- oldState, (feedback i oldGuess) == oldFeedback]
-          newGuess = chooseNextGuess(possibleAns)
+          -- newGuess = possibleAns !! 0
+          newGuess = chooseNextGuess possibleAns
           newState = delete newGuess possibleAns
 
 
 chooseNextGuess :: [[Card]] -> [Card]
 chooseNextGuess lst
-    | length lst >= 2000 = head lst
+    | length lst >= 1500 = head lst
     | otherwise = newGuess 
         where feedbackList = [feedback i j | i <- lst, j <- lst]
-              scoreList = [(calculateScore(groupByFeedback i lst), i) | i <- lst]
+              scoreList = [(calculateScore(group $ sort [feedback j i | j <- lst, j /= i]), i) | i <- lst]
               (_, newGuess) = head(sort scoreList)
 
 ------------------------------------------------------------------------------
@@ -57,7 +58,7 @@ initialChooseRank n lst
  | otherwise = [lst !! (i*(n + 1) - 1) | i <- [1..length lst], 
                                          (i*(n + 1) - 1) < length lst]
 
-initialGameState :: Int -> [Card]-> GameState
+initialGameState :: Int -> [Card]-> [[Card]]
 initialGameState 2 deck = choose2 deck
 initialGameState 3 deck = choose3 deck
 initialGameState 4 deck = choose4 deck
@@ -195,18 +196,24 @@ deleteBySuit = deleteBy equalSuit
 
 -- similar to the group function defined in Data.List, but based on feedback
 -- with the benchmark
-groupByFeedback :: [Card] -> [[Card]] -> [[[Card]]]
-groupByFeedback benchmark = groupBy (equalFeedback benchmark)
+-- groupByFeedback :: [Card] -> [[Card]] -> [[[Card]]]
+-- groupByFeedback benchmark = groupBy (equalFeedback benchmark)
 
-calculateScore :: [[[Card]]] -> Double
+-- calculateScore :: [[[Card]]] -> Double
+calculateScore :: [[(Int, Int, Int, Int, Int)]] -> Double
 calculateScore [] = 0.0
 calculateScore lst = fromIntegral ss / fromIntegral s where (ss, s) = getSums lst
 
-getSums :: [[[Card]]] -> (Int, Int)
+getSums :: [[(Int, Int, Int, Int, Int)]] -> (Int, Int)
 getSums [] = (0, 0)
 getSums (x:xs) = (ss + (length x)^2, s + length x) where (ss, s) = getSums xs
 
 x = fromIntegral (length benchmark)^2 / fromIntegral (length benchmark)
 
 benchmark = stringToCard ["2C"]
-test = [stringToCard ["2C"], stringToCard ["3C"], stringToCard ["3C"], stringToCard ["4C"], stringToCard ["5C"]]
+test = [stringToCard ["3C"], stringToCard ["3D"], stringToCard ["4C"], stringToCard ["5C"]]
+-- test = [stringToCard ["2C"], stringToCard ["3C"], stringToCard ["3D"], stringToCard ["4C"], stringToCard ["5C"]]
+
+-- ["2C"]
+-- ["3C", "3C", "4C", "5C"]
+
