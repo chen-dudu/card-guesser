@@ -28,9 +28,19 @@ initialGuess n
 
 
 nextGuess :: ([Card], GameState) -> (Int, Int, Int, Int, Int) -> ([Card], GameState)
-nextGuess (guess, oldState) oldFeedback = (newState !! 0, newState) 
-    where newState = [i | i <- oldState, (feedback i guess) == oldFeedback]
+nextGuess (oldGuess, oldState) oldFeedback = (newGuess, newState)
+    where possibleAns = [i | i <- oldState, (feedback i oldGuess) == oldFeedback]
+          newGuess = chooseNextGuess(possibleAns)
+          newState = delete newGuess possibleAns
 
+
+chooseNextGuess :: [[Card]] -> [Card]
+chooseNextGuess lst
+    | length lst >= 2000 = head lst
+    | otherwise = newGuess 
+        where feedbackList = [feedback i j | i <- lst, j <- lst]
+              scoreList = [(calculateScore(groupByFeedback i lst), i) | i <- lst]
+              (_, newGuess) = head(sort scoreList)
 
 ------------------------------------------------------------------------------
 
@@ -139,12 +149,19 @@ compareRank (Card _ rank1) (Card _ rank2)
     | otherwise = 0
 
 -- this function checks if two cards have the same rank
+-- used as an equality test function for deleteBy
 equalRank :: Card -> Card -> Bool
 equalRank (Card _ rank1) (Card _ rank2) = rank1 == rank2
 
 -- this function checks if two cards have the same suit
+-- used as an equality test function for deleteBy
 equalSuit :: Card -> Card -> Bool
 equalSuit (Card suit1 _) (Card suit2 _) = suit1 == suit2
+
+-- use the first card list as benchmark, check if the other two card list
+-- have the same feedback
+equalFeedback :: [Card] -> [Card] -> [Card] -> Bool
+equalFeedback benchmark l1 l2 = (feedback benchmark l1) == (feedback benchmark l2)
 
 -- similar to the elem function defined in the prelude, but based on rank
 elemRank :: Card -> [Card] -> Bool
@@ -176,3 +193,20 @@ deleteByRank = deleteBy equalRank
 deleteBySuit :: Card -> [Card] -> [Card]
 deleteBySuit = deleteBy equalSuit
 
+-- similar to the group function defined in Data.List, but based on feedback
+-- with the benchmark
+groupByFeedback :: [Card] -> [[Card]] -> [[[Card]]]
+groupByFeedback benchmark = groupBy (equalFeedback benchmark)
+
+calculateScore :: [[[Card]]] -> Double
+calculateScore [] = 0.0
+calculateScore lst = fromIntegral ss / fromIntegral s where (ss, s) = getSums lst
+
+getSums :: [[[Card]]] -> (Int, Int)
+getSums [] = (0, 0)
+getSums (x:xs) = (ss + (length x)^2, s + length x) where (ss, s) = getSums xs
+
+x = fromIntegral (length benchmark)^2 / fromIntegral (length benchmark)
+
+benchmark = stringToCard ["2C"]
+test = [stringToCard ["2C"], stringToCard ["3C"], stringToCard ["3C"], stringToCard ["4C"], stringToCard ["5C"]]
