@@ -37,7 +37,7 @@ nextGuess (oldGuess, oldState) oldFeedback = (newGuess, newState)
 
 chooseNextGuess :: [[Card]] -> [Card]
 chooseNextGuess lst
-    | length lst >= 1500 = head lst
+    | length lst >= 1500 = lst !! (div (length lst) 2)
     | otherwise = newGuess 
         where feedbackList = [feedback i j | i <- lst, j <- lst]
               scoreList = [(calculateScore(group $ sort [feedback j i | j <- lst, j /= i]), i) | i <- lst]
