@@ -42,7 +42,6 @@ initialGuess n
               -- a standard 52-card deck
               deck = stringToCard [i:j:[] | j <- suitchars, i <- rankchars]
 
-
 nextGuess :: ([Card], GameState) -> (Int, Int, Int, Int, Int) -> ([Card], GameState)
 nextGuess (oldGuess, oldState) oldFeedback = (newGuess, newState)
     where possibleAns = [i | i <- oldState, (feedback i oldGuess) == oldFeedback]
@@ -56,6 +55,7 @@ chooseNextGuess lst
         where feedbackList = [feedback i j | i <- lst, j <- lst]
               scoreList = [(calculateScore(group $ sort [feedback j i | j <- lst, j /= i]), i) | i <- lst]
               (_, newGuess) = head(sort scoreList)
+
 ------------------------------------------------------------------------------
 
 ------------------------------ Helper Functions ------------------------------
@@ -78,7 +78,8 @@ countMatchCard _ _ = 0
 countLowerRank :: [Card] -> [Card] -> Int
 countLowerRank [] [] = 0
 countLowerRank (x:xs) (y:ys)
-    | (compareRank x y) < 0 = 1 + countLowerRank xs (y:ys)
+    -- | (compareRank x y) < 0 = 1 + countLowerRank xs (y:ys)
+    | (getRank x) < (getRank y) = 1 + countLowerRank xs (y:ys)
     | otherwise = 0 
 -- only for pattern matching to be exhaustive
 countLowerRank _ _ = 0
@@ -101,7 +102,8 @@ countHigherRank [] [] = 0
 countHigherRank [] _ = 0
 countHigherRank _ [] = 0
 countHigherRank xs ys
-    | (compareRank (last xs) (last ys)) > 0 = 1 + countHigherRank (init xs) ys
+    -- | (compareRank (last xs) (last ys)) > 0 = 1 + countHigherRank (init xs) ys
+    | (getRank (last xs)) < (getRank (last ys)) = 1 + countHigherRank (init xs) ys
     | otherwise = 0
 
 -- Given two lists of cards, this function returns an integer indicating
@@ -142,7 +144,6 @@ stringToCard :: [String] -> [Card]
 stringToCard [] = []
 stringToCard (x:xs) = (read x :: Card) : stringToCard xs
 
-
 choose2 :: [Card] -> [[Card]]
 choose2 lst = [[i, j] | i <- lst, 
                         j <- (drop (1 + getIndex (elemIndex i lst)) lst)]
@@ -165,20 +166,14 @@ calculateScore [] = 0.0
 calculateScore lst = fromIntegral ss / fromIntegral s 
                          where (ss, s) = getSums lst
 
--- Given a (Maybe Int) type, this funciton returns the integer (-1 for Nothing) 
+-- Given a (Maybe Int) type, this funciton returns the integer (-1 for Nothing)
 getIndex :: Maybe Int -> Int
 getIndex Nothing = -1
 getIndex (Just n) = n
 
--- Given two cards, this function compare if they have the same rank
--- return -1 if the rank of the first onen is smaller
--- return 1 if the rank of the second one is smaller
--- return 0 if they have the same rank
-compareRank :: Card -> Card -> Int
-compareRank (Card _ rank1) (Card _ rank2)
-    | rank1 < rank2 = -1
-    | rank1 > rank2 = 1
-    | otherwise = 0
+-- Given a card, this funciton returns the rank of the card
+getRank :: Card -> Rank
+getRank (Card suit rank) = rank
 
 -- Given two cards, this function check if they have the same rank
 -- this function checks if two cards have the same rank
