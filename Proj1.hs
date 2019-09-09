@@ -1,23 +1,60 @@
 -- File    : Proj1.hs
 -- Author  : Liguo Chen
--- Purpose : This file contains the source code for 
---           COMP30020-Declarativev Programming Project 1
+-- Purpose : An implementation of the card guessing game
+
+{- | This file contains the source code for 
+     COMP30020-Declarativev Programming Project 1. 
+     In this file, three important functions in the game are implemented:
+
+     feedback: takes a target as the first argument and a guess as the 
+               second argument, each represented as a list of Cards, and 
+               returns the five feedback numebrs as a tuple.
+     initialGuess: takes the number of cards in the answer as input and
+                   returns a pair of an initial guess, which should be
+                   a list of the specified number of cards, and a game
+                   state.
+     nextGuess: takes as input a pair of the previous guess and game 
+                state, and the feedback to this guess as a quintuple of
+                counts of the correct cards, low ranks, correct ranks, 
+                high ranks and correct suits, and returns a pair of the
+                next guess and new game state.
+-}
 
 module Proj1 (feedback, initialGuess, nextGuess, GameState) where
+
+------------------------------------------------------------------------------
+------------------------------ Required Library ------------------------------
+------------------------------------------------------------------------------
 
 import Data.List
 import Data.Ord (comparing)
 import Card
 
+------------------------------------------------------------------------------
+--------------------------------- Constants ----------------------------------
+------------------------------------------------------------------------------
+
 -- Some constants used in this module
-rankchars = "23456789TJQKA"
-suitchars = "CDHS"
+-- all ranks in a standard 52-card deck
+allRanks = [R2 .. Ace]
+-- all suit in a standard 52-card deck
+allSuits = [Club .. Spade]
+-- the smallest card in the deck (considering both suit and rank)
+firstCard = Card Club R2
+-- the largest card in the deck (considering both suit and rank)
+lastCard = Card Spade Ace
+
+------------------------------------------------------------------------------
+------------------------------ Type Declaration ------------------------------
+------------------------------------------------------------------------------
 
 -- The state of the game
 type GameState = [[Card]]
 
--- Given the target as first argument and guess as the second argument,
--- this function calculate the required feedback tuple
+------------------------------------------------------------------------------
+------------------------------- Main Functions -------------------------------
+------------------------------------------------------------------------------
+
 feedback :: [Card] -> [Card] -> (Int, Int, Int, Int, Int)
 feedback target guess = 
     (countMatchCard (sort target) (sort guess),
@@ -26,27 +63,30 @@ feedback target guess =
     countHigherRank (sortByRank target) (sortByRank guess),
     countMatchSuit target guess)
 
--- Given the number of cards in the answer, this function makes 
--- the first guess and setup the state of the game
 initialGuess :: Int -> ([Card], GameState)
 initialGuess n
     | n < 1 = error("invalid input!")
     | otherwise = (firstGuess, delete firstGuess (initialGameState n deck))
-        where firstGuess = stringToCard (zipWith formCardString ranks suits)
+        where firstGuess = zipWith formCard suits ranks
               -- rank for the first guess
-              ranks = initialChooseRank separation rankchars
+              ranks = initialChooseRank separation allRanks
               -- suit for the first guess
-              suits = [suitchars !! i | i <- [0..n]]
+              suits = [allSuits !! i | i <- [0..n]]
               -- width of gap between cards in the first guess
-              separation = (length rankchars) `div` (n + 1)
+              separation = (length allRanks) `div` (n + 1)
               -- a standard 52-card deck
-              deck = stringToCard [i:j:[] | j <- suitchars, i <- rankchars]
+              deck = [firstCard..lastCard]
 
 nextGuess :: ([Card], GameState) -> (Int, Int, Int, Int, Int) -> ([Card], GameState)
 nextGuess (oldGuess, oldState) oldFeedback = (newGuess, newState)
-    where possibleAns = [i | i <- oldState, (feedback i oldGuess) == oldFeedback]
-          newGuess = chooseNextGuess possibleAns
-          newState = delete newGuess possibleAns
+    where
+        -- all card lists in the GameState with the 
+        -- same feedback could be answer 
+        possibleAns = [i | i <- oldState, (feedback i oldGuess) == oldFeedback]
+        -- choose the next guess from all possible answers
+        newGuess = chooseNextGuess possibleAns
+        -- update GameState
+        newState = delete newGuess possibleAns
 
 chooseNextGuess :: [[Card]] -> [Card]
 chooseNextGuess lst
@@ -57,9 +97,7 @@ chooseNextGuess lst
               (_, newGuess) = head(sort scoreList)
 
 ------------------------------------------------------------------------------
-
 ------------------------------ Helper Functions ------------------------------
-
 ------------------------------------------------------------------------------
 
 -- Given two lists of cards, this function returns an integer indicating
@@ -133,16 +171,10 @@ initialChooseRank n lst
  | otherwise = [lst !! (i*(n + 1) - 1) | i <- [1..length lst], 
                                          (i*(n + 1) - 1) < length lst]
 
--- Given two chars representing the rank and suit of a card,
--- this function returns the string representation of the card
-formCardString :: Char -> Char -> String
-formCardString rank suie = rank:suie:[]
-
--- Given a list of strings representing cards, this function converts each
--- card string to the actual Card type.
-stringToCard :: [String] -> [Card]
-stringToCard [] = []
-stringToCard (x:xs) = (read x :: Card) : stringToCard xs
+-- Given the suit and rank of a card, this function returns a card
+-- with the specified suit and rank
+formCard :: Suit -> Rank -> Card
+formCard suit rank = Card suit rank
 
 choose2 :: [Card] -> [[Card]]
 choose2 lst = [[i, j] | i <- lst, 
@@ -186,14 +218,14 @@ equalRank (Card _ rank1) (Card _ rank2) = rank1 == rank2
 equalSuit :: Card -> Card -> Bool
 equalSuit (Card suit1 _) (Card suit2 _) = suit1 == suit2
 
--- similar to the elem function defined in the prelude, but based on rank
+-- similar to the elem function defined in the Prelude, but based on rank
 elemRank :: Card -> [Card] -> Bool
 elemRank _ [] = False
 elemRank card (x:xs)
     | equalRank card x = True
     | otherwise = elemRank card xs
 
--- similar to the elem function defined in the prelude, but based on suit
+-- similar to the elem function defined in the Prelude, but based on suit
 elemSuit :: Card -> [Card] -> Bool
 elemSuit _ [] = False
 elemSuit card (x:xs)
