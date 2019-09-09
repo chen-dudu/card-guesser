@@ -141,7 +141,7 @@ countHigherRank [] _ = 0
 countHigherRank _ [] = 0
 countHigherRank xs ys
     -- | (compareRank (last xs) (last ys)) > 0 = 1 + countHigherRank (init xs) ys
-    | (getRank (last xs)) < (getRank (last ys)) = 1 + countHigherRank (init xs) ys
+    | (getRank (last xs)) > (getRank (last ys)) = 1 + countHigherRank (init xs) ys
     | otherwise = 0
 
 -- Given two lists of cards, this function returns an integer indicating
