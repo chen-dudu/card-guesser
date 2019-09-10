@@ -158,11 +158,14 @@ countMatchSuit _ _ = 0
 
 -- Given an integer indicating the number of cards in the answer, and a list
 -- of cards as the deck, this function returns all the combinations
-initialGameState :: Int -> [Card]-> GameState
-initialGameState 2 deck = choose2 deck
-initialGameState 3 deck = choose3 deck
-initialGameState 4 deck = choose4 deck
-initialGameState _ _ = error("invalid input!")
+choose :: Int -> [Card] -> [[Card]]
+choose 1 lst = [[i] | i <- lst]
+choose n (x:xs)
+    | n < 0 = error("invalid input!")
+    | otherwise = [(head i):j | i <- outerList, j <- innerList, 
+                                (head i) < (head j)]
+        where outerList = [[k] | k <- (init (x:xs))]
+              innerList = choose (n - 1) xs
 
 -- Given a list, and an integer indicating the separation width, 
 -- this function returns a new list of elements with the specified width
@@ -173,47 +176,13 @@ initialChooseRank n lst
  | otherwise = [lst !! (i*(n + 1) - 1) | i <- [1..length lst], 
                                          (i*(n + 1) - 1) < length lst]
 
-choose2 :: [Card] -> [[Card]]
-choose2 lst = [[i, j] | i <- lst, 
-                        j <- (drop (1 + getIndex (elemIndex i lst)) lst)]
-
-choose3 :: [Card] -> [[Card]]
-choose3 lst = [[i, j, k] | i <- lst, 
-                        j <- (drop (1 + getIndex (elemIndex i lst)) lst), 
-                        k <- (drop (1 + getIndex (elemIndex j lst)) lst)]
-
-choose4 :: [Card] -> [[Card]]
-choose4 lst = [[i, j, k, m] | i <- lst, 
-                        j <- (drop (1 + getIndex (elemIndex i lst)) lst), 
-                        k <- (drop (1 + getIndex (elemIndex j lst)) lst), 
-                        m <- (drop (1 + getIndex (elemIndex k lst)) lst)]
-
--- choose :: Int -> [Int] -> [[Int]]
-choose :: Int -> [Card] -> [[Card]]
-choose 1 lst = [[i] | i <- lst]
-choose n (x:xs)
-    | n < 0 = error("invalid input!")
-    | otherwise = [(head i):j | i <- outerList, j <- innerList, (head i) < (head j)]
-    -- | otherwise = [(head i):j | i <- outerList, j <- innerList, not (elem (head i) j) && ((head i) < (head j))]     
-    -- | otherwise = removeDup [sort ((head i):j) | i <- outerList, j <- innerList, not (elem (head i) j)] 
-        where outerList = [[k] | k <- (init (x:xs))]
-              innerList = choose (n - 1) xs
-
--- removeDup :: [Int] -> [Int]
-removeDup :: [[Card]] -> [[Card]]
-removeDup [] = []
-removeDup [x] = [x]
-removeDup (x:y:xs)
-    | x == y = x:(removeDup (xs))
-    | otherwise = x:(removeDup (y:xs))
-
 ----------------------------- making next guess ------------------------------
 
 -- Given a list of lists of cards, this function returns a list of card as the
 -- guess for the next guess, using the algoritm provided in the project spec
 chooseNextGuess :: [[Card]] -> [Card]
 chooseNextGuess lst
-    | length lst >= 1800 = lst !! (div (length lst) 2)
+    | length lst >= 1500 = lst !! (div (length lst) 2)
     | otherwise = newGuess 
         where feedbackList = [feedback i j | i <- lst, j <- lst]
               scoreList = [(calculateScore(group $ sort 
