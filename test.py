@@ -37,8 +37,12 @@ if __name__ == '__main__':
         for j in RANKS:
             deck.append(j+i)
 
+    open2 = False
+    open3 = False
+    open4 = True
+
     # # n = 2
-    if False:
+    if open2:
         num_trial = 100
         average_guess = []
         timeout_count = 0
@@ -98,7 +102,7 @@ if __name__ == '__main__':
         print("timeout happens", timeout_count, "times")
 
     # # n = 3
-    if False:
+    if open3:
         num_trial = 25
         average_guess = []
         timeout_count = 0
@@ -160,7 +164,7 @@ if __name__ == '__main__':
         print("timeout happens", timeout_count, "times")
 
     # n = 4
-    if True:
+    if open4:
         average_guess = []
         num_trial = 10
         timeout_count = 0
