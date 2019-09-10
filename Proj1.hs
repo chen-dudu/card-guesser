@@ -26,9 +26,11 @@ module Proj1 (feedback, initialGuess, nextGuess, GameState) where
 ------------------------------ Required Library ------------------------------
 ------------------------------------------------------------------------------
 
-import Data.List
-import Data.Ord (comparing)
 import Card
+import Data.List
+import Data.Set (isSubsetOf)
+import Data.Set (fromList)
+import Data.Ord (comparing)
 
 ------------------------------------------------------------------------------
 --------------------------------- Constants ----------------------------------
@@ -65,7 +67,7 @@ feedback target guess =
 initialGuess :: Int -> ([Card], GameState)
 initialGuess n
     | n < 1 = error("invalid input!")
-    | otherwise = (firstGuess, delete firstGuess (initialGameState n deck))
+    | otherwise = (firstGuess, delete firstGuess (choose n deck))
         where 
             -- width of gap between cards in the first guess
             separation = (length allRanks) `div` (n + 1)
@@ -186,13 +188,32 @@ choose4 lst = [[i, j, k, m] | i <- lst,
                         k <- (drop (1 + getIndex (elemIndex j lst)) lst), 
                         m <- (drop (1 + getIndex (elemIndex k lst)) lst)]
 
+-- choose :: Int -> [Int] -> [[Int]]
+choose :: Int -> [Card] -> [[Card]]
+choose 1 lst = [[i] | i <- lst]
+choose n (x:xs)
+    | n < 0 = error("invalid input!")
+    | otherwise = [(head i):j | i <- outerList, j <- innerList, (head i) < (head j)]
+    -- | otherwise = [(head i):j | i <- outerList, j <- innerList, not (elem (head i) j) && ((head i) < (head j))]     
+    -- | otherwise = removeDup [sort ((head i):j) | i <- outerList, j <- innerList, not (elem (head i) j)] 
+        where outerList = [[k] | k <- (init (x:xs))]
+              innerList = choose (n - 1) xs
+
+-- removeDup :: [Int] -> [Int]
+removeDup :: [[Card]] -> [[Card]]
+removeDup [] = []
+removeDup [x] = [x]
+removeDup (x:y:xs)
+    | x == y = x:(removeDup (xs))
+    | otherwise = x:(removeDup (y:xs))
+
 ----------------------------- making next guess ------------------------------
 
 -- Given a list of lists of cards, this function returns a list of card as the
 -- guess for the next guess, using the algoritm provided in the project spec
 chooseNextGuess :: [[Card]] -> [Card]
 chooseNextGuess lst
-    | length lst >= 1500 = lst !! (div (length lst) 2)
+    | length lst >= 1800 = lst !! (div (length lst) 2)
     | otherwise = newGuess 
         where feedbackList = [feedback i j | i <- lst, j <- lst]
               scoreList = [(calculateScore(group $ sort 
