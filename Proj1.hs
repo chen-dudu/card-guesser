@@ -28,8 +28,6 @@ module Proj1 (feedback, initialGuess, nextGuess, GameState) where
 
 import Card
 import Data.List
-import Data.Set (isSubsetOf)
-import Data.Set (fromList)
 import Data.Ord (comparing)
 
 ------------------------------------------------------------------------------
@@ -158,7 +156,7 @@ countMatchSuit _ _ = 0
 
 -- Given an integer indicating the number of cards in the answer, and a list
 -- of cards as the deck, this function returns all the combinations
-choose :: Int -> [Card] -> [[Card]]
+choose :: Int -> [Card] -> GameState    
 choose 1 lst = [[i] | i <- lst]
 choose n (x:xs)
     | n < 0 = error("invalid input!")
@@ -208,11 +206,6 @@ formCard suit rank = Card suit rank
 -- Given a card, this funciton returns the rank of the card
 getRank :: Card -> Rank
 getRank (Card _ rank) = rank
-
--- Given a (Maybe Int) type, this funciton returns the integer (-1 for Nothing)
-getIndex :: Maybe Int -> Int
-getIndex Nothing = -1
-getIndex (Just n) = n
 
 -- Given a list of lists of tuples, this function returns a 2-tuple ---
 -- the first component is the sum of square of each tuple list
