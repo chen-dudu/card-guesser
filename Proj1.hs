@@ -228,7 +228,7 @@ elemSuit card (x:xs)
     | equalSuit card x = True
     | otherwise = elemSuit card xs
 
--- sort the card list in ascending order of rank
+-- Given a list of cards, this function returns a sorted list of cards
 sortByRank :: [Card] -> [Card]
 sortByRank = sortBy (comparing rank)
 
@@ -240,13 +240,10 @@ deleteByRank = deleteBy equalRank
 deleteBySuit :: Card -> [Card] -> [Card]
 deleteBySuit = deleteBy equalSuit
 
--- Given two cards, this function check if they have the same rank
--- this function checks if two cards have the same rank
--- used as an equality test function for deleteBy
+-- Given two cards, this function checks if they have the same rank
 equalRank :: Card -> Card -> Bool
 equalRank (Card _ rank1) (Card _ rank2) = rank1 == rank2
 
--- this function checks if two cards have the same suit
--- used as an equality test function for deleteBy
+-- Given two cards, this function checks if they have the same suit
 equalSuit :: Card -> Card -> Bool
 equalSuit (Card suit1 _) (Card suit2 _) = suit1 == suit2
