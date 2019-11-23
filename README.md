@@ -24,7 +24,7 @@ form the answer for this game. The aim of the game is for the guesser to guess t
   - 2 / 5 Good use of language and libraries
 
 - Assessment Criteria
-  - 5 = pratically flawless
+  - 5 = practically flawless
   - 4 = very good, but not perfect
   - 3 = passable, but not great
   - 2 = unsatisfactory, but on the right track
